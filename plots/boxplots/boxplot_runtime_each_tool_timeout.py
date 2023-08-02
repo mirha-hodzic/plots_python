@@ -2,75 +2,77 @@ import sqlite3
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Step 1: Connect to the SQLite database and retrieve the data
-db_path = "C:/Users/mirha/Desktop/plots/sqlite-2023-07-10.db"
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
+def generate_plot6():
 
-# Execute the query to retrieve the data
-query = "SELECT avg_runtime, run_timeout, tool FROM _run_group;"
-cursor.execute(query)
-data = cursor.fetchall()
+    # Step 1: Connect to the SQLite database and retrieve the data
+    db_path = "C:/Users/mirha/Desktop/plots/sqlite-2023-07-10.db"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
-# Close the connection to the database
-conn.close()
+    # Execute the query to retrieve the data
+    query = "SELECT avg_runtime, run_timeout, tool FROM _run_group;"
+    cursor.execute(query)
+    data = cursor.fetchall()
 
-# Step 2: Process the data for plotting
-data_dict = {}
-labels = []
+    # Close the connection to the database
+    conn.close()
 
-for avg_runtime, run_timeout, tool in data:
-    key = f"{tool}/{run_timeout}"
-    
-    if key not in data_dict:
-        data_dict[key] = []
-        labels.append(key)
-    
-    data_dict[key].append(avg_runtime)
+    # Step 2: Process the data for plotting
+    data_dict = {}
+    labels = []
 
-# Step 3: Create the box plot
-# Create a list to hold all the data arrays for plotting
-data_to_plot = [data_dict[label] for label in labels]
+    for avg_runtime, run_timeout, tool in data:
+        key = f"{tool}/{run_timeout}"
+        
+        if key not in data_dict:
+            data_dict[key] = []
+            labels.append(key)
+        
+        data_dict[key].append(avg_runtime)
 
-# Create a unique color map for each tool
-unique_tools = set(tool for _, _, tool in data)
-tool_colors = plt.cm.tab20(np.linspace(0, 1, len(unique_tools)))
+    # Step 3: Create the box plot
+    # Create a list to hold all the data arrays for plotting
+    data_to_plot = [data_dict[label] for label in labels]
 
-# Map each tool to its respective color
-tool_color_map = {tool: color for tool, color in zip(unique_tools, tool_colors)}
+    # Create a unique color map for each tool
+    unique_tools = set(tool for _, _, tool in data)
+    tool_colors = plt.cm.tab20(np.linspace(0, 1, len(unique_tools)))
 
-# Create a figure and axes
-fig, ax = plt.subplots()
+    # Map each tool to its respective color
+    tool_color_map = {tool: color for tool, color in zip(unique_tools, tool_colors)}
 
-# Create the box plot with custom box colors
-bp = ax.boxplot(data_to_plot, labels=labels, patch_artist=True)
+    # Create a figure and axes
+    fig, ax = plt.subplots()
 
-# Customize each box's color based on the tool
-for box, label in zip(bp['boxes'], labels):
-    tool = label.split('/')[0]
-    box.set(facecolor=tool_color_map[tool])
+    # Create the box plot with custom box colors
+    bp = ax.boxplot(data_to_plot, labels=labels, patch_artist=True)
 
-# Optionally, add a title and axis labels
-ax.set_title('Box Plot: Runtime for each tool and run timeout')
-ax.set_xlabel('Tool / Run Timeout')
-ax.set_ylabel('Runtime')
+    # Customize each box's color based on the tool
+    for box, label in zip(bp['boxes'], labels):
+        tool = label.split('/')[0]
+        box.set(facecolor=tool_color_map[tool])
 
-# Step 4: Change the y-axis to logarithmic scale
-ax.set_yscale('log')
+    # Optionally, add a title and axis labels
+    ax.set_title('Box Plot: Runtime for each tool and run timeout')
+    ax.set_xlabel('Tool / Run Timeout')
+    ax.set_ylabel('Runtime')
 
-# Step 5: Create a second Y-axis and copy the tick positions and labels from the original Y-axis
-ax2 = ax.twinx()
-ax2.set_yscale('log')
-ax2.set_ylim(ax.get_ylim())  # Copy the same limits from the original Y-axis
+    # Step 4: Change the y-axis to logarithmic scale
+    ax.set_yscale('log')
 
-# Optionally, if you want to customize the appearance of the copied Y-axis tick labels:
-# y_ticks, _ = plt.yticks()
-# ax2.set_yticks(y_ticks)
-# ax2.set_yticklabels([f"{val:.2f}" for val in y_ticks])
+    # Step 5: Create a second Y-axis and copy the tick positions and labels from the original Y-axis
+    ax2 = ax.twinx()
+    ax2.set_yscale('log')
+    ax2.set_ylim(ax.get_ylim())  # Copy the same limits from the original Y-axis
 
-# Rotate the x-axis tick labels vertically
-ax.tick_params(axis='x', rotation=90)
+    # Optionally, if you want to customize the appearance of the copied Y-axis tick labels:
+    # y_ticks, _ = plt.yticks()
+    # ax2.set_yticks(y_ticks)
+    # ax2.set_yticklabels([f"{val:.2f}" for val in y_ticks])
 
-# Show the plot
-plt.grid(True)
-plt.show()
+    # Rotate the x-axis tick labels vertically
+    ax.tick_params(axis='x', rotation=90)
+
+    # Show the plot
+    plt.grid(True)
+    plt.show()
